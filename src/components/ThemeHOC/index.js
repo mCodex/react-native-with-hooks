@@ -1,18 +1,30 @@
-import React, { useContext } from 'react';
+import React, { useState } from 'react';
 import { View } from 'react-native';
 
-import { ThemeProvider, ThemeContext } from 'styled-components/native';
+import { ThemeProvider } from 'styled-components/native';
 
-import lightTheme from './themes/light';
-import darkTheme from './themes/dark';
+import MyThemeContext from '../../context/MyThemeContext';
+
+import light from './themes/light';
+import dark from './themes/dark';
 
 export default function(WrappedComponent) {
   const ThemeHOC = props => {
+    const [activeTheme, setActiveTheme] = useState('light');
+
+    const theme = activeTheme === 'light' ? light : dark;
+
     return (
-      <ThemeProvider theme={darkTheme}>
-        <View style={{ flex: 1, backgroundColor: darkTheme.colors.backgroundColor }}>
-          <WrappedComponent {...props} />
-        </View>
+      <ThemeProvider theme={theme}>
+        <MyThemeContext.Provider
+          value={{ activeTheme, onThemeChanged: mode => setActiveTheme(mode) }}
+        >
+          <View style={{ flex: 1, backgroundColor: theme.colors.backgroundColor }}>
+            <MyThemeContext.Consumer>
+              {themeContextProps => <WrappedComponent {...props} {...themeContextProps} />}
+            </MyThemeContext.Consumer>
+          </View>
+        </MyThemeContext.Provider>
       </ThemeProvider>
     );
   };
